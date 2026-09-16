@@ -1,7 +1,42 @@
 @echo off
-echo Desplegando Lumiere Estetica en Cloudflare...
+REM ============================================================
+REM  Publica Lumiere Estetica
+REM
+REM  OJO: desde el 16-sep-2026 quien sirve esta web es GitHub
+REM  Pages, NO Cloudflare. Por eso este .bat hace "git push" y
+REM  ya no "wrangler pages deploy": si se desplegara a Cloudflare
+REM  los cambios NO se verian en el enlace bueno.
+REM
+REM  Enlace bueno: https://lumiere.creskio.com
+REM ============================================================
 cd /d "E:\Escritorio\Agencia Webs IA\PLANTILLA PARA TODAS CLINICAS ESTETICAS"
-echo n | npx wrangler pages deploy . --project-name lumiere-estetica --branch main
+
 echo.
-echo Listo! Visita https://lumiere-estetica.pages.dev
+echo  Publicando Lumiere Estetica
+echo  --------------------------------------------
+echo.
+
+git add -A
+git diff --cached --quiet && (echo  No hay ningun cambio que publicar. & pause & exit /b 0)
+
+set "MSG="
+set /p MSG=  Que has cambiado (una linea):
+if "%MSG%"=="" set "MSG=Actualizar la web"
+
+git commit -m "%MSG%"
+if errorlevel 1 (echo. & echo  Fallo el commit, no se ha subido nada. & pause & exit /b 1)
+
+git push origin master
+if errorlevel 1 (echo. & echo  Fallo el push. Revisa la conexion y vuelve a intentarlo. & pause & exit /b 1)
+
+echo.
+echo  Listo. En menos de un minuto se ve en:
+echo     https://lumiere.creskio.com
+echo.
+echo  Si has tocado functions\api\chat.js (el texto del bot),
+echo  hace falta ADEMAS actualizar su cerebro:
+echo.
+echo     cd worker-chat
+echo     npx wrangler deploy
+echo.
 pause
